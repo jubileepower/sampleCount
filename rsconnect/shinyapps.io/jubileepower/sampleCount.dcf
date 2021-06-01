@@ -1,0 +1,12 @@
+name: sampleCount
+title: sampleCount
+username:
+account: jubileepower
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4200296
+bundleId: 4651691
+url: https://jubileepower.shinyapps.io/sampleCount/
+when: 1622218334.15121
+asMultiple: FALSE
+asStatic: FALSE

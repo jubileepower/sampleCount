@@ -1,0 +1,241 @@
+---
+title: "COVID19_SampleSizeNeeded4variants"
+author: Julie Chih-yu Chen
+date: May 21th, 2021
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(here)
+library(tibble)
+```
+## Calculations for representative sampling of SARS-CoV-2 cases for genomic monitoring from routine surveillance
+
+#### Sample Size Estimation Lit: 
+
+* [Lit 1](https://onlinelibrary.wiley.com/doi/abs/10.1002/0471667196.ess7211)
+* [Lit 2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3895825/)
+* [Lit 3](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4017493/)
+
+#### Add in precision and sample size correction:
+
+* [MAIN Ref - SARS-CoV-2](https://www.ecdc.europa.eu/sites/default/files/documents/Guidance-for-representative-and-targeted-genomic-SARS-CoV-2-monitoring.pdf)
+* [WHO TB Ref](https://www.who.int/tb/advisory_bodies/impact_measurement_taskforce/meetings/prevalence_survey/psws_sample_size_design_williams_bierrenbach.pdf)
+
+#### Parameters:
+
+* M = positive sample count per week
+* p = expected prevalence
+* d = relative precision
+* crit: critical value for a confidence interval of 95% = 1.96
+
+## Objective 1: Sample size required in prevalence studies (SARS-CoV-2 variants)
+Novel or emerging variant detection
+
+###  Table 1: 100,000 example
+```{r T1}
+
+d=0.5
+crit=1.96
+
+# Expected prevalence of 2.5%
+p=0.025
+
+#Computed sample size
+(n <- ceiling(crit^2*p*(1-p)/(p*d)^2)) #600 for >100,000
+
+#Estimated sample size - corrected
+Ms=100000
+#For cases <100k: computed counts gets corrected to be ncorr. Table 1 reports the estimated sample size, ncorr, for the upper bound (count) of the range.
+(ncorr <- (ceiling((n*Ms)/(n+Ms))))
+
+```
+
+
+
+## Objective 2: Sample size required according to the expected increase in the prevalence 
+Situation awareness: the trend in the relative proportion of these variants over time.
+
+
+#### Parameters:
+
+* M = positive sample count per week
+* d = relative precision
+
+The critical value (critAlpha) here is one sided, so using Zalpha
+* critAlpha: critical value for a confidence interval of 95% = 1.64
+* critBeta: a power of 80%, so beta = 0.2 and the critical value = 0.87
+* p1 = expected prevalence to be compared
+* p2 = expected prevalence to be compared
+
+
+### Table 2: detect a difference in proportion from 1% to 3%
+```{r obj2}
+
+p1=0.01
+p2=0.03
+critBeta=0.87
+critAlpha=1.64
+
+(n=ceiling((critAlpha+critBeta)^2*(p1*(1-p1)+p2*(1-p2))/(p1-p2)^2))
+
+
+Ms=100000
+(norr=(ceiling((n*Ms)/(n+Ms))))
+
+
+```
+
+## Tables for Provinces
+
+### Generating the table for samples needed to detect novel variants with an expected prevalence of 2.5% (monthly, weekly)
+Sample size needed to estimate the 95% confidence interval for the proportion of a certain circulating variant when its relative proportion reaches 2.5% (Objective 1) with a relative precision of 50%, based on random selection of samples per month or week 
+
+```{r}
+inputFile=here("data","dummyData.xlsx")
+outputFile=here("data","dummyDataOut.xlsx")
+
+
+d=0.5
+crit=1.96
+p=0.025# Expected prevalence of 2.5%
+
+#Computed sample size
+(n <- ceiling(crit^2*p*(1-p)/(p*d)^2))
+
+
+###
+### monthly
+###
+monthlyCnt <- read_excel(inputFile, sheet=1)
+#View(monthlyCnt)
+Ms=monthlyCnt$Cases
+#Estimated sample size - corrected
+ncorr <- (ceiling((n*Ms)/(n+Ms)))
+#Add to the original table
+monthlyCnt <- monthlyCnt %>% add_column(toSamp_2.5 = ncorr)
+#View(monthlyCnt)
+
+###
+### weekly
+###
+weeklyCnt <- read_excel(inputFile, sheet=2)
+Ms=weeklyCnt$Cases
+#Estimated sample size - corrected
+ncorr <- (ceiling((n*Ms)/(n+Ms)))
+#Add to the original table
+weeklyCnt <- weeklyCnt %>% add_column(toSamp_2.5 = ncorr)
+
+ 
+```
+
+
+### Generating the table for samples needed to detect a difference in the relative proportion of a certain variant from 2.5% to 5% (monthly, weekly)
+Sample size needed to detect a difference in the proportion of a certain variant, from 2.5% to 5% (Objective 2) within a month/week with a confidence level of 95% and a power of 80%.
+```{r}
+
+p1=0.025
+p2=0.05
+critBeta=0.87
+critAlpha=1.64
+(n <- ceiling((critAlpha+critBeta)^2*(p1*(1-p1)+p2*(1-p2))/(p1-p2)^2))
+
+
+
+###
+### monthly
+###
+Ms=monthlyCnt$Cases
+
+ncorr <- (ceiling((n*Ms)/(n+Ms)))
+#Add to the original table
+monthlyCnt <- monthlyCnt %>% add_column(toSamp_2.5_5 = ncorr)
+
+
+###
+### weekly
+###
+Ms=weeklyCnt$Cases
+#Estimated sample size - corrected
+ncorr <- (ceiling((n*Ms)/(n+Ms)))
+#Add to the original table
+weeklyCnt <- weeklyCnt %>% add_column(toSamp_2.5_5 = ncorr)
+
+
+```
+
+### Generating the table for samples needed to detect novel variants with an expected prevalence of 1% (monthly, weekly)
+
+
+```{r}
+d=0.5
+crit=1.96
+p=0.01# Expected prevalence of 1%
+#Computed sample size
+(n <- ceiling(crit^2*p*(1-p)/(p*d)^2))
+
+
+
+###
+### monthly
+###
+Ms=monthlyCnt$Cases
+#Estimated sample size - corrected
+ncorr <- (ceiling((n*Ms)/(n+Ms)))
+#Add to the original table
+monthlyCnt <- monthlyCnt %>% add_column(toSamp_1 = ncorr)
+#View(monthlyCnt)
+
+###
+### weekly
+###
+Ms=weeklyCnt$Cases
+#Estimated sample size - corrected
+ncorr <- (ceiling((n*Ms)/(n+Ms)))
+#Add to the original table
+weeklyCnt <- weeklyCnt %>% add_column(toSamp_1 = ncorr)
+
+ 
+```
+### Generating the table for samples needed to detect a difference in the relative proportion of a certain variant from 1% to 3% (monthly, weekly)
+
+```{r}
+
+p1=0.01
+p2=0.03
+critBeta=0.87
+critAlpha=1.64
+(n <- ceiling((critAlpha+critBeta)^2*(p1*(1-p1)+p2*(1-p2))/(p1-p2)^2))
+
+
+
+###
+### monthly
+###
+Ms=monthlyCnt$Cases
+
+ncorr <- (ceiling((n*Ms)/(n+Ms)))
+#Add to the original table
+(monthlyCnt <- monthlyCnt %>% add_column(toSamp_1_3 = ncorr))
+
+
+###
+### weekly
+###
+Ms=weeklyCnt$Cases
+#Estimated sample size - corrected
+ncorr <- (ceiling((n*Ms)/(n+Ms)))
+#Add to the original table
+(weeklyCnt <- weeklyCnt %>% add_column(toSamp_1_3 = ncorr))
+
+
+library(openxlsx)
+
+
+list_of_datasets <- list( "MonthlySampleNeeded" = as.data.frame(monthlyCnt), "WeeklySampleNeeded" = as.data.frame(weeklyCnt))
+write.xlsx(list_of_datasets, file = outputFile)
+
+
+```

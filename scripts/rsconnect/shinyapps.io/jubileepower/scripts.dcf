@@ -1,0 +1,12 @@
+name: scripts
+title: scripts
+username:
+account: jubileepower
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4229910
+bundleId: 4679257
+url: https://jubileepower.shinyapps.io/scripts/
+when: 1622842679.00583
+asMultiple: FALSE
+asStatic: FALSE

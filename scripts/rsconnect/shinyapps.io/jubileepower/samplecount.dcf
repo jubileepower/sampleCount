@@ -1,0 +1,13 @@
+name: samplecount
+title: sampleCount
+username:
+account: jubileepower
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4200296
+bundleId: 4679285
+url: https://jubileepower.shinyapps.io/sampleCount/
+when: 1622843125.53036
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: sampleSizeCal.html|sampleSizeCal.rmd
